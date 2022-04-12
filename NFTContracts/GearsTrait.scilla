@@ -1,0 +1,1822 @@
+(* SPDX-License-Identifier: MIT *)
+scilla_version 0
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+import BoolUtils ListUtils IntUtils
+library GearTrait
+
+type Operation =
+| Add
+| Sub
+
+(* Heroes type *)
+type HeroesTrait =
+| HeroesTrait of String String String (List String)
+
+(* Global variables *)
+let false = False
+let true = True
+let zero = Uint256 0
+let one = Uint256 1
+let three = Uint256 3
+let four = Uint256 4
+let two = Uint256 2
+let five = Uint256 5
+let six = Uint256 6
+let seven = Uint256 7
+let eight = Uint256 8
+let nine = Uint256 9
+let ten = Uint256 10
+let eleven = Uint256 11
+let twelve = Uint256 12
+let thirteen = Uint256 13
+let fourteen = Uint256 14
+let fifteen = Uint256 15
+let sixteen = Uint256 16
+let eighteen = Uint256 18
+let twenty = Uint256 20
+let thirty = Uint256 30
+let fourty = Uint256 40
+let fifty = Uint256 50
+let hundred = Uint256 100
+let eighty = Uint256 80
+let eighty_six = Uint256 86
+let seventy = Uint256 70
+let ninety_one = Uint256 91
+let ninety_five = Uint256 95
+let ninety_eight = Uint256 98
+let hundred_thirty_one = Uint256 131
+let hundred_twenty_one = Uint256 121
+let hundred_sixty_one = Uint256 161
+let hundred_seventy_one = Uint256 171
+let two_hundred_one = Uint256 201
+let empty_string = ""
+let pro = "%"
+
+
+(* Library functions *)
+let one_msg =
+  fun (msg: Message) =>
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+
+(* Error exception *)
+type Error =
+  | NotPausedError
+  | PausedError
+  | SelfError
+  | NotContractOwnerError
+  | NotContractOwnershipRecipientError
+  | NotTokenOwnerError
+  | NotMinterError
+  | NotOwnerOrOperatorError
+  | MinterNotFoundError
+  | MinterFoundError
+  | SpenderFoundError
+  | OperatorNotFoundError
+  | OperatorFoundError
+  | NotAllowedToTransferError
+  | TokenNotFoundError
+  | InvalidFeeBPSError
+  | ZeroAddressDestinationError
+  | ThisAddressDestinationError
+
+type GearType =
+  | Weapon
+  | Helmet
+  | Armor
+  | Shoes
+  | Neclace
+  | Ring
+
+
+type GearLevelType =
+  | Level1
+  | Level2
+  | Level3
+  | Level4
+  | Level5
+
+type  SubstatType =
+  | ATK
+  | ATKP
+  | DEF
+  | DEFP
+  | HP
+  | HPP
+  | SPD
+  | CRIT_DMGP
+  | CRIT_RATEP
+  | ACCP
+  | RESP
+
+type NameAndGearType =
+  | NameAndGearType of String GearType
+
+let make_error =
+  fun (result: Error) =>
+    let result_code =
+      match result with
+      | NotPausedError                     => Int32 -1
+      | PausedError                        => Int32 -2
+      | SelfError                          => Int32 -3
+      | NotContractOwnerError              => Int32 -4
+      | NotTokenOwnerError                 => Int32 -5
+      | NotMinterError                     => Int32 -6
+      | NotOwnerOrOperatorError            => Int32 -7
+      | MinterNotFoundError                => Int32 -8
+      | MinterFoundError                   => Int32 -9
+      | SpenderFoundError                  => Int32 -10
+      | OperatorNotFoundError              => Int32 -11
+      | OperatorFoundError                 => Int32 -12
+      | NotAllowedToTransferError          => Int32 -13
+      | TokenNotFoundError                 => Int32 -14
+      | InvalidFeeBPSError                 => Int32 -15
+      | ZeroAddressDestinationError        => Int32 -16
+      | ThisAddressDestinationError        => Int32 -17
+      | NotContractOwnershipRecipientError => Int32 -18
+      end
+    in
+    { _exception: "Error"; code: result_code }
+
+
+let cons_one_substat =
+  fun (param1: String) =>
+    let nil = Nil {String} in
+      Cons {String} param1 nil
+
+let cons_two_substat =
+  fun (param1: String) =>
+  fun (param2: String) =>
+    let l1 = cons_one_substat param1 in
+      Cons {String} param2 l1
+
+let cons_three_substat =
+  fun (param1: String) =>
+  fun (param2: String) =>
+  fun (param3: String) =>
+    let l1 = cons_two_substat param1 param2 in
+      Cons {String} param3 l1
+
+
+let cons_four_substat =
+  fun (param1: String) =>
+  fun (param2: String) =>
+  fun (param3: String) =>
+  fun (param4: String) =>
+    let l1 = cons_three_substat param1 param2 param3 in
+      Cons {String} param4 l1
+
+let cons_five_substat =
+  fun (param1: String) =>
+  fun (param2: String) =>
+  fun (param3: String) =>
+  fun (param4: String) =>
+  fun (param5: String) =>
+    let l1 = cons_four_substat param1 param2 param3 param4 in
+      Cons {String} param5 l1
+
+let cons_six_substat =
+  fun (param1: String) =>
+  fun (param2: String) =>
+  fun (param3: String) =>
+  fun (param4: String) =>
+  fun (param5: String) =>
+  fun (param6: String) =>
+    let l1 = cons_five_substat param1 param2 param3 param4 param5 in
+      Cons {String} param6 l1
+
+
+let get_mainstat =
+  fun (gear_type: GearType) =>
+  fun (seed: Uint256) =>
+    let restSeven = builtin rem seed seven in
+    let is_zero_seven = builtin eq restSeven zero in
+    let is_one_seven = builtin eq restSeven one in
+    let is_two_seven = builtin eq restSeven two in
+    let is_three_seven = builtin eq restSeven three in
+    let is_four_seven = builtin eq restSeven four in
+    let is_five_seven = builtin eq restSeven five in
+    let restEight = builtin rem seed eight in
+    let is_zero_eight = builtin eq restEight zero in
+    let is_one_eight = builtin eq restEight one in
+    let is_two_eight = builtin eq restEight two in
+    let is_three_eight = builtin eq restEight three in
+    let is_four_eight = builtin eq restEight four in
+    let is_five_eight = builtin eq restEight five in
+    let is_six_eight = builtin eq restEight six in
+    match gear_type with
+    | Weapon => "ATTACK"
+    | Helmet => "HP"
+    | Armor => "DEF"
+    | Shoes =>
+      match is_zero_seven with
+      | True => "SPD"
+      | False =>
+        match is_one_seven with
+        | True => "ATK"
+        | False =>
+          match is_two_seven with
+          | True => "ATK%"
+          | False =>
+            match is_three_seven with
+            | True => "HP"
+            | False =>
+              match is_four_seven with
+              | True => "HP%"
+              | False =>
+                match is_five_seven with
+                | True => "DEF"
+                | False => "DEF%"
+                end
+              end
+            end
+          end
+        end
+      end
+    | Neclace =>
+      match is_zero_eight with
+      | True => "Crit.Rate%"
+      | False =>
+        match is_one_eight with
+        | True => "Crit.DMG%"
+        | False =>
+          match is_two_eight with
+          | True => "ATK%"
+          | False =>
+            match is_three_eight with
+            | True => "ATK"
+            | False =>
+              match is_four_eight with
+              | True => "HP"
+              | False =>
+                match is_five_eight with
+                | True => "HP%"
+                | False =>
+                  match is_six_eight with
+                  | True => "DEF"
+                  | False => "DEF%"
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    | Ring =>
+      match is_zero_eight with
+      | True => "ACC"
+      | False =>
+        match is_one_eight with
+        | True => "RES"
+        | False =>
+          match is_two_eight with
+          | True => "ATK"
+          | False =>
+            match is_three_eight with
+            | True => "ATK%"
+            | False =>
+              match is_four_eight with
+              | True => "HP%"
+              | False =>
+                match is_five_eight with
+                | True => "HP"
+                | False =>
+                  match is_six_eight with
+                  | True => "DEF"
+                  | False => "DEF%"
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+
+let get_formatted_substat =
+  fun (seed: Uint256) =>
+  fun (range_num: Uint256) =>
+  fun (default_num: Uint256) =>
+  fun (is_pro: Bool) =>
+  fun (substat_type: String) =>
+    match is_pro with
+    | True =>
+      let rand_num = builtin rem seed range_num in
+      let substat_num = builtin add rand_num default_num in
+      let substat_num_string = builtin to_string substat_num in
+      let substat_num_string_pro = builtin concat substat_num_string pro in
+      builtin concat substat_type substat_num_string_pro
+    | False =>
+      let rand_num = builtin rem seed range_num in
+      let substat_num = builtin add rand_num default_num in
+      let substat_num_string = builtin to_string substat_num in
+      builtin concat substat_type substat_num_string
+    end
+
+let get_substat_number =
+  fun (lv: GearLevelType) =>
+  fun (substat_spec: SubstatType) =>
+  fun (seed: Uint256) =>
+    match lv with
+    | Level3 =>
+      match substat_spec with
+      | ATK =>
+        let substat_type = "ATK " in
+        get_formatted_substat seed eighty_six fifteen false substat_type
+      | ATKP =>
+        let substat_type = "ATK " in
+        get_formatted_substat seed five two true substat_type
+      | DEF =>
+        let substat_type = "DEF " in
+        get_formatted_substat seed eighty_six fifteen false substat_type
+      | DEFP =>
+        let substat_type = "DEF " in
+        get_formatted_substat seed five two true substat_type
+      | HP =>
+        let substat_type = "HP " in
+        get_formatted_substat seed hundred_twenty_one thirty false substat_type
+      | HPP =>
+        let substat_type = "HP " in
+        get_formatted_substat seed five two true substat_type
+      | SPD =>
+        let substat_type = "SPD " in
+        get_formatted_substat seed four one false substat_type
+      | CRIT_DMGP =>
+        let substat_type = "CRIT.DMG " in
+        get_formatted_substat seed four three true substat_type
+      | CRIT_RATEP =>
+        let substat_type = "CRIT.RATE " in
+        get_formatted_substat seed four two true substat_type
+      | ACCP =>
+        let substat_type = "ACC " in
+        get_formatted_substat seed five two true substat_type
+      | RESP =>
+        let substat_type = "RES " in
+        get_formatted_substat seed five two true substat_type
+      end
+    | Level4 =>
+      match substat_spec with
+      | ATK =>
+        let substat_type = "ATK " in
+        get_formatted_substat seed hundred_thirty_one twenty false substat_type
+      | ATKP =>
+        let substat_type = "ATK " in
+        get_formatted_substat seed six three true substat_type
+      | DEF =>
+        let substat_type = "DEF " in
+        get_formatted_substat seed hundred_thirty_one twenty false substat_type
+      | DEFP =>
+        let substat_type = "DEF " in
+        get_formatted_substat seed six three true substat_type
+      | HP =>
+        let substat_type = "HP " in
+        get_formatted_substat seed hundred_sixty_one fourty false substat_type
+      | HPP =>
+        let substat_type = "HP " in
+        get_formatted_substat seed six three true substat_type
+      | SPD =>
+        let substat_type = "SPD " in
+        get_formatted_substat seed five one false substat_type
+      | CRIT_DMGP =>
+        let substat_type = "CRIT.DMG " in
+        get_formatted_substat seed five three true substat_type
+      | CRIT_RATEP =>
+        let substat_type = "CRIT.RATE " in
+        get_formatted_substat seed four three true substat_type
+      | ACCP =>
+        let substat_type = "ACC " in
+        get_formatted_substat seed six three true substat_type
+      | RESP =>
+        let substat_type = "RES " in
+        get_formatted_substat seed six three true substat_type
+      end
+    | Level5 =>
+      match substat_spec with
+      | ATK =>
+        let substat_type = "ATK " in
+        get_formatted_substat seed hundred_seventy_one thirty false substat_type
+      | ATKP =>
+        let substat_type = "ATK " in
+        get_formatted_substat seed seven four true substat_type
+      | DEF =>
+        let substat_type = "DEF " in
+        get_formatted_substat seed hundred_seventy_one thirty false substat_type
+      | DEFP =>
+        let substat_type = "DEF " in
+        get_formatted_substat seed seven four true substat_type
+      | HP =>
+        let substat_type = "HP " in
+        get_formatted_substat seed two_hundred_one fifty false substat_type
+      | HPP =>
+        let substat_type = "HP " in
+        get_formatted_substat seed seven four true substat_type
+      | SPD =>
+        let substat_type = "SPD " in
+        get_formatted_substat seed five two false substat_type
+      | CRIT_DMGP =>
+        let substat_type = "CRIT.DMG " in
+        get_formatted_substat seed five four true substat_type
+      | CRIT_RATEP =>
+        let substat_type = "CRIT.RATE " in
+        get_formatted_substat seed five three true substat_type
+      | ACCP =>
+        let substat_type = "ACC " in
+        get_formatted_substat seed seven four true substat_type
+      | RESP =>
+        let substat_type = "RES " in
+        get_formatted_substat seed seven four true substat_type
+      end
+    | _ =>
+      match substat_spec with
+        | ATK =>
+          let substat_type = "ATK " in
+          get_formatted_substat seed ninety_one ten false substat_type
+        | ATKP =>
+          let substat_type = "ATK " in
+          get_formatted_substat seed four one true substat_type
+        | DEF =>
+          let substat_type = "DEF " in
+          get_formatted_substat seed ninety_one ten false substat_type
+        | DEFP =>
+          let substat_type = "DEF " in
+          get_formatted_substat seed four one true substat_type
+        | HP =>
+          let substat_type = "HP " in
+          get_formatted_substat seed hundred_thirty_one twenty false substat_type
+        | HPP =>
+          let substat_type = "HP " in
+          get_formatted_substat seed four one true substat_type
+        | SPD =>
+          let substat_type = "SPD " in
+          get_formatted_substat seed three one false substat_type
+        | CRIT_DMGP =>
+          let substat_type = "CRIT.DMG " in
+          get_formatted_substat seed three three true substat_type
+        | CRIT_RATEP =>
+          let substat_type = "CRIT.RATE " in
+          get_formatted_substat seed three two true substat_type
+        | ACCP =>
+          let substat_type = "ACC " in
+          get_formatted_substat seed four one true substat_type
+        | RESP =>
+          let substat_type = "RES " in
+          get_formatted_substat seed four one true substat_type
+      end
+    end
+
+
+
+
+let get_substat =
+  fun (gear_type: GearType) =>
+  fun (seed: Uint256) =>
+  fun (lv: GearLevelType) =>
+    let restEight = builtin rem seed eight in
+    let is_zero_eight = builtin eq restEight zero in
+    let is_one_eight = builtin eq restEight one in
+    let is_two_eight = builtin eq restEight two in
+    let is_three_eight = builtin eq restEight three in
+    let is_four_eight = builtin eq restEight four in
+    let is_five_eight = builtin eq restEight five in
+    let is_six_eight = builtin eq restEight six in
+
+    let restEleven = builtin rem seed eleven in
+    let is_zero_eleven = builtin eq restEleven zero in
+    let is_one_eleven = builtin eq restEleven one in
+    let is_two_eleven = builtin eq restEleven two in
+    let is_three_eleven = builtin eq restEleven three in
+    let is_four_eleven = builtin eq restEleven four in
+    let is_five_eleven = builtin eq restEleven five in
+    let is_six_eleven = builtin eq restEleven six in
+    let is_seven_eleven = builtin eq restEleven seven in
+    let is_eight_eleven = builtin eq restEleven eight in
+    let is_nine_eleven = builtin eq restEleven nine in
+
+    match gear_type with
+    | Weapon =>
+      match is_zero_eight with
+      | True =>
+        let substat_spec = ATKP in
+        get_substat_number lv substat_spec seed
+      | False =>
+        match is_one_eight with
+        | True =>
+          let substat_spec = HP in
+          get_substat_number lv substat_spec seed
+        | False =>
+          match is_two_eight with
+          | True =>
+            let substat_spec = HPP in
+            get_substat_number lv substat_spec seed
+          | False =>
+            match is_three_eight with
+            | True =>
+              let substat_spec = SPD in
+              get_substat_number lv substat_spec seed
+            | False =>
+              match is_four_eight with
+              | True =>
+                let substat_spec = CRIT_RATEP in
+                get_substat_number lv substat_spec seed
+              | False =>
+                match is_five_eight with
+                | True =>
+                  let substat_spec = CRIT_DMGP in
+                  get_substat_number lv substat_spec seed
+                | False =>
+                  match is_six_eight with
+                  | True =>
+                    let substat_spec = ACCP in
+                    get_substat_number lv substat_spec seed
+                  | False =>
+                    let substat_spec = RESP in
+                    get_substat_number lv substat_spec seed
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    | Helmet =>
+      match is_zero_eleven with
+      | True =>
+        let substat_spec = ATKP in
+        get_substat_number lv substat_spec seed
+      | False =>
+        match is_one_eleven with
+        | True =>
+          let substat_spec = ATK in
+          get_substat_number lv substat_spec seed
+        | False =>
+          match is_two_eleven with
+          | True =>
+            let substat_spec = HP in
+            get_substat_number lv substat_spec seed
+          | False =>
+            match is_three_eleven with
+            | True =>
+              let substat_spec = HPP in
+              get_substat_number lv substat_spec seed
+            | False =>
+              match is_four_eleven with
+              | True =>
+                let substat_spec = DEF in
+                get_substat_number lv substat_spec seed
+              | False =>
+                match is_five_eleven with
+                | True =>
+                  let substat_spec = DEFP in
+                  get_substat_number lv substat_spec seed
+                | False =>
+                  match is_six_eleven with
+                  | True =>
+                    let substat_spec = SPD in
+                    get_substat_number lv substat_spec seed
+                  | False =>
+                    match is_seven_eleven with
+                    | True =>
+                      let substat_spec = CRIT_RATEP in
+                      get_substat_number lv substat_spec seed
+                    | False =>
+                      match is_eight_eleven with
+                      | True =>
+                        let substat_spec = CRIT_DMGP in
+                        get_substat_number lv substat_spec seed
+                      | False =>
+                        match is_nine_eleven with
+                        | True =>
+                          let substat_spec = ACCP in
+                          get_substat_number lv substat_spec seed
+                        | False =>
+                          let substat_spec = RESP in
+                          get_substat_number lv substat_spec seed
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    | Armor =>
+      match is_zero_eight with
+      | True =>
+        let substat_spec = HP in
+        get_substat_number lv substat_spec seed
+      | False =>
+        match is_one_eight with
+        | True =>
+          let substat_spec = HPP in
+          get_substat_number lv substat_spec seed
+        | False =>
+          match is_two_eight with
+          | True =>
+            let substat_spec = DEFP in
+            get_substat_number lv substat_spec seed
+          | False =>
+            match is_three_eight with
+            | True =>
+              let substat_spec = SPD in
+              get_substat_number lv substat_spec seed
+            | False =>
+              match is_four_eight with
+              | True =>
+                let substat_spec = CRIT_RATEP in
+                get_substat_number lv substat_spec seed
+              | False =>
+                match is_five_eight with
+                | True =>
+                  let substat_spec = CRIT_DMGP in
+                  get_substat_number lv substat_spec seed
+                | False =>
+                  match is_six_eight with
+                  | True =>
+                    let substat_spec = ACCP in
+                    get_substat_number lv substat_spec seed
+                  | False =>
+                    let substat_spec = RESP in
+                    get_substat_number lv substat_spec seed
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    | Shoes =>
+      match is_zero_eleven with
+      | True =>
+        let substat_spec = ATKP in
+        get_substat_number lv substat_spec seed
+      | False =>
+        match is_one_eleven with
+        | True =>
+          let substat_spec = ATK in
+          get_substat_number lv substat_spec seed
+        | False =>
+          match is_two_eleven with
+          | True =>
+            let substat_spec = HP in
+            get_substat_number lv substat_spec seed
+          | False =>
+            match is_three_eleven with
+            | True =>
+              let substat_spec = HPP in
+              get_substat_number lv substat_spec seed
+            | False =>
+              match is_four_eleven with
+              | True =>
+                let substat_spec = DEF in
+                get_substat_number lv substat_spec seed
+              | False =>
+                match is_five_eleven with
+                | True =>
+                  let substat_spec = DEFP in
+                  get_substat_number lv substat_spec seed
+                | False =>
+                  match is_six_eleven with
+                  | True =>
+                    let substat_spec = SPD in
+                    get_substat_number lv substat_spec seed
+                  | False =>
+                    match is_seven_eleven with
+                    | True =>
+                      let substat_spec = CRIT_RATEP in
+                      get_substat_number lv substat_spec seed
+                    | False =>
+                      match is_eight_eleven with
+                      | True =>
+                        let substat_spec = CRIT_DMGP in
+                        get_substat_number lv substat_spec seed
+                      | False =>
+                        match is_nine_eleven with
+                        | True =>
+                          let substat_spec = ACCP in
+                          get_substat_number lv substat_spec seed
+                        | False =>
+                          let substat_spec = RESP in
+                          get_substat_number lv substat_spec seed
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    | Neclace =>
+      match is_zero_eleven with
+      | True =>
+        let substat_spec = ATKP in
+        get_substat_number lv substat_spec seed
+      | False =>
+        match is_one_eleven with
+        | True =>
+          let substat_spec = ATK in
+          get_substat_number lv substat_spec seed
+        | False =>
+          match is_two_eleven with
+          | True =>
+            let substat_spec = HP in
+            get_substat_number lv substat_spec seed
+          | False =>
+            match is_three_eleven with
+            | True =>
+              let substat_spec = HPP in
+              get_substat_number lv substat_spec seed
+            | False =>
+              match is_four_eleven with
+              | True =>
+                let substat_spec = DEF in
+                get_substat_number lv substat_spec seed
+              | False =>
+                match is_five_eleven with
+                | True =>
+                  let substat_spec = DEFP in
+                  get_substat_number lv substat_spec seed
+                | False =>
+                  match is_six_eleven with
+                  | True =>
+                    let substat_spec = SPD in
+                    get_substat_number lv substat_spec seed
+                  | False =>
+                    match is_seven_eleven with
+                    | True =>
+                      let substat_spec = CRIT_RATEP in
+                      get_substat_number lv substat_spec seed
+                    | False =>
+                      match is_eight_eleven with
+                      | True =>
+                        let substat_spec = CRIT_DMGP in
+                        get_substat_number lv substat_spec seed
+                      | False =>
+                        match is_nine_eleven with
+                        | True =>
+                          let substat_spec = ACCP in
+                          get_substat_number lv substat_spec seed
+                        | False =>
+                          let substat_spec = RESP in
+                          get_substat_number lv substat_spec seed
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    | Ring =>
+      match is_zero_eleven with
+      | True =>
+        let substat_spec = ATKP in
+        get_substat_number lv substat_spec seed
+      | False =>
+        match is_one_eleven with
+        | True =>
+          let substat_spec = ATK in
+          get_substat_number lv substat_spec seed
+        | False =>
+          match is_two_eleven with
+          | True =>
+            let substat_spec = HP in
+            get_substat_number lv substat_spec seed
+          | False =>
+            match is_three_eleven with
+            | True =>
+              let substat_spec = HPP in
+              get_substat_number lv substat_spec seed
+            | False =>
+              match is_four_eleven with
+              | True =>
+                let substat_spec = DEF in
+                get_substat_number lv substat_spec seed
+              | False =>
+                match is_five_eleven with
+                | True =>
+                  let substat_spec = DEFP in
+                  get_substat_number lv substat_spec seed
+                | False =>
+                  match is_six_eleven with
+                  | True =>
+                    let substat_spec = SPD in
+                    get_substat_number lv substat_spec seed
+                  | False =>
+                    match is_seven_eleven with
+                    | True =>
+                      let substat_spec = CRIT_RATEP in
+                      get_substat_number lv substat_spec seed
+                    | False =>
+                      match is_eight_eleven with
+                      | True =>
+                        let substat_spec = CRIT_DMGP in
+                        get_substat_number lv substat_spec seed
+                      | False =>
+                        match is_nine_eleven with
+                        | True =>
+                          let substat_spec = ACCP in
+                          get_substat_number lv substat_spec seed
+                        | False =>
+                          let substat_spec = RESP in
+                          get_substat_number lv substat_spec seed
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+
+
+
+
+let get_token_trait_lv1 =
+  fun (gear_type: GearType) =>
+  fun (seed: Uint256) =>
+  fun (tokenname: String) =>
+    let token_level = "1*" in
+    let gear_level = Level1 in
+    let mainstat = get_mainstat gear_type seed in
+    (* CHAOTIC*)
+    let seed1 = builtin div seed hundred in
+    let chao_rest_hundred = builtin rem seed1 hundred in
+    let chao_is_true = builtin eq chao_rest_hundred zero in
+    match chao_is_true with
+    | True =>
+      let seed2 = builtin div seed1 hundred in
+      let substat1 = get_substat gear_type seed2 gear_level in
+      let substats = cons_one_substat substat1 in
+      HeroesTrait tokenname token_level mainstat substats
+    | False =>
+      let substats = Nil {String} in
+      HeroesTrait tokenname token_level mainstat substats
+    end
+
+let get_token_trait_lv2 =
+  fun (gear_type: GearType) =>
+  fun (seed: Uint256) =>
+  fun (tokenname: String) =>
+    let token_level = "2*" in
+    let gear_level = Level2 in
+    let mainstat = get_mainstat gear_type seed in
+    let seed1 = builtin div seed hundred in
+    let substat1 = get_substat gear_type seed1 gear_level in
+    (* CHAOTIC*)
+    let seed2 = builtin div seed1 hundred in
+    let chao_rest_hundred = builtin rem seed2 hundred in
+    let chao_is_true = builtin eq chao_rest_hundred zero in
+    match chao_is_true with
+    | True =>
+      let seed3 = builtin div seed2 hundred in
+      let substat2 = get_substat gear_type seed3 gear_level in
+      let substats = cons_two_substat substat1 substat2 in
+      HeroesTrait tokenname token_level mainstat substats
+    | False =>
+      let substats = cons_one_substat substat1 in
+      HeroesTrait tokenname token_level mainstat substats
+    end
+
+let get_token_trait_lv3 =
+  fun (gear_type: GearType) =>
+  fun (seed: Uint256) =>
+  fun (tokenname: String) =>
+    let token_level = "3*" in
+    let gear_level = Level3 in
+    let mainstat = get_mainstat gear_type seed in
+    let seed1 = builtin div seed hundred in
+    let substat1 = get_substat gear_type seed1 gear_level in
+    let seed2 = builtin div seed1 hundred in
+    let substat2 = get_substat gear_type seed2 gear_level in
+    (* CHAOTIC*)
+    let seed3 = builtin div seed2 hundred in
+    let chao_rest_hundred = builtin rem seed3 hundred in
+    let chao_is_true = builtin eq chao_rest_hundred zero in
+    match chao_is_true with
+    | True =>
+      let seed4 = builtin div seed3 hundred in
+      let substat3 = get_substat gear_type seed4 gear_level in
+      let substats = cons_three_substat substat1 substat2 substat3 in
+      HeroesTrait tokenname token_level mainstat substats
+    | False =>
+      let substats = cons_two_substat substat1 substat2 in
+      HeroesTrait tokenname token_level mainstat substats
+    end
+
+
+let get_token_trait_lv4 =
+  fun (gear_type: GearType) =>
+  fun (seed: Uint256) =>
+  fun (tokenname: String) =>
+    let token_level = "4*" in
+    let gear_level = Level4 in
+    let mainstat = get_mainstat gear_type seed in
+    let seed1 = builtin div seed hundred in
+    let substat1 = get_substat gear_type seed1 gear_level in
+    let seed2 = builtin div seed1 hundred in
+    let substat2 = get_substat gear_type seed2 gear_level in
+    let seed3 = builtin div seed2 hundred in
+    let substat3 = get_substat gear_type seed3 gear_level in
+
+    (* CHAOTIC*)
+    let seed4 = builtin div seed3 hundred in
+    let chao_rest_hundred = builtin rem seed4 hundred in
+    let chao_is_true = builtin eq chao_rest_hundred zero in
+    match chao_is_true with
+    | True =>
+      let seed5 = builtin div seed4 hundred in
+      let substat4 = get_substat gear_type seed5 gear_level in
+      let substats = cons_four_substat substat1 substat2 substat3 substat4 in
+      HeroesTrait tokenname token_level mainstat substats
+    | False =>
+      let substats = cons_three_substat substat1 substat2 substat3 in
+      HeroesTrait tokenname token_level mainstat substats
+    end
+
+
+let get_bonus_trait =
+  fun (seed: Uint256) =>
+    let rest_seven = builtin rem seed seven in
+    let is_zero = builtin eq rest_seven zero in
+    let is_one = builtin eq rest_seven one in
+    let is_two = builtin eq rest_seven two in
+    let is_three = builtin eq rest_seven three in
+    let is_four = builtin eq rest_seven four in
+    let is_five = builtin eq rest_seven five in
+    match is_zero with
+    | True => "Life Set"
+    | False =>
+      match is_one with
+      | True => "Harden Set"
+      | False =>
+        match is_two with
+        | True => "Strength Set"
+        | False =>
+          match is_three with
+          | True => "Degenerate Set"
+          | False =>
+            match is_four with
+            | True => "Effectiveness Set"
+            | False =>
+              match is_five with
+              | True => "Explosion Set"
+              | False => "Vampire Set"
+              end
+            end
+          end
+        end
+      end
+    end
+let get_token_trait_lv5 =
+  fun (gear_type: GearType) =>
+  fun (seed: Uint256) =>
+  fun (tokenname: String) =>
+    let token_level = "5*" in
+    let gear_level = Level5 in
+    let mainstat = get_mainstat gear_type seed in
+    let seed1 = builtin div seed hundred in
+    let substat1 = get_substat gear_type seed1 gear_level in
+    let seed2 = builtin div seed1 hundred in
+    let substat2 = get_substat gear_type seed2 gear_level in
+    let seed3 = builtin div seed2 hundred in
+    let substat3 = get_substat gear_type seed3 gear_level in
+    let seed4 = builtin div seed3 hundred in
+    let substat4 = get_substat gear_type seed4 gear_level in
+
+    let seed5 = builtin div seed4 hundred in
+    let bonusstat = get_bonus_trait seed5 in
+    (* CHAOTIC*)
+    let seed6 = builtin div seed5 hundred in
+    let chao_rest_hundred = builtin rem seed6 hundred in
+    let chao_is_true = builtin eq chao_rest_hundred zero in
+    match chao_is_true with
+    | True =>
+      let seed7 = builtin div seed6 hundred in
+      let substat5 = get_substat gear_type seed7 gear_level in
+      let substats = cons_six_substat substat1 substat2 substat3 substat4 substat5 bonusstat in
+      HeroesTrait tokenname token_level mainstat substats
+    | False =>
+      let substats = cons_five_substat substat1 substat2 substat3 substat4 bonusstat in
+      HeroesTrait tokenname token_level mainstat substats
+    end
+
+
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+
+contract GearTrait
+(
+  initial_contract_owner: ByStr20
+)
+
+
+(* Emit Errors *)
+procedure Throw(error: Error)
+  e = make_error error;
+  throw e
+end
+
+transition GenerateTrait(token_id: Uint256, seed: Uint256, is_high_level: Bool)
+
+  (* create nft traits according to the seed *)
+  restHundred = builtin rem seed hundred;
+  is_less_than_80 = builtin lt restHundred eighty;
+  is_less_than_98 = builtin lt restHundred ninety_eight;
+  is_less_than_70 = builtin lt restHundred seventy;
+  is_less_than_95 = builtin lt restHundred ninety_five;
+
+  restEighteen = builtin rem seed eighteen;
+  is_0_18 = builtin eq restEighteen zero;
+  is_1_18 = builtin eq restEighteen one;
+  is_2_18 = builtin eq restEighteen two;
+  is_3_18 = builtin eq restEighteen three;
+  is_4_18 = builtin eq restEighteen four;
+  is_5_18 = builtin eq restEighteen five;
+  is_6_18 = builtin eq restEighteen six;
+  is_7_18 = builtin eq restEighteen seven;
+  is_8_18 = builtin eq restEighteen eight;
+  is_9_18 = builtin eq restEighteen nine;
+  is_10_18 = builtin eq restEighteen ten;
+  is_11_18 = builtin eq restEighteen eleven;
+  is_12_18 = builtin eq restEighteen twelve;
+  is_13_18 = builtin eq restEighteen thirteen;
+  is_14_18 = builtin eq restEighteen fourteen;
+  is_15_18 = builtin eq restEighteen fifteen;
+  is_16_18 = builtin eq restEighteen sixteen;
+
+  match is_high_level with
+  | True =>
+    match is_less_than_80 with
+    | True =>
+      name_and_type = match is_0_18 with
+      | True =>
+        let tokenname = "Steel Sword*" in let gear_type = Weapon in
+        NameAndGearType tokenname gear_type
+      | False =>
+        match is_1_18 with
+        | True =>
+          let tokenname = "Steel Helmet" in let gear_type = Helmet in
+          NameAndGearType tokenname gear_type
+        | False =>
+          match is_2_18 with
+          | True =>
+            let tokenname = "Steel Armor" in let gear_type = Armor in
+            NameAndGearType tokenname gear_type
+          | False =>
+            match is_3_18 with
+            | True =>
+              let tokenname = "Steel Shoes" in let gear_type = Shoes in
+              NameAndGearType tokenname gear_type
+            | False =>
+              match is_4_18 with
+              | True =>
+                let tokenname = "Intermediate Archer Bow" in let gear_type = Weapon in
+                NameAndGearType tokenname gear_type
+              | False =>
+                match is_5_18 with
+                | True =>
+                  let tokenname = "Light Huntsman Helmet" in let gear_type = Helmet in
+                  NameAndGearType tokenname gear_type
+                | False =>
+                  match is_6_18 with
+                  | True =>
+                    let tokenname = "Light Huntsman Armor" in let gear_type = Armor in
+                    NameAndGearType tokenname gear_type
+                  | False =>
+                    match is_7_18 with
+                    | True =>
+                      let tokenname = "Light Huntsman Boots" in let gear_type = Shoes in
+                      NameAndGearType tokenname gear_type
+                    | False =>
+                      match is_8_18 with
+                      | True =>
+                        let tokenname = "Enchanted Wand" in let gear_type = Weapon in
+                        NameAndGearType tokenname gear_type
+                      | False =>
+                        match is_9_18 with
+                        | True =>
+                          let tokenname = "Enchanted Silk Cap" in let gear_type = Helmet in
+                          NameAndGearType tokenname gear_type
+                        | False =>
+                          match is_10_18 with
+                          | True =>
+                            let tokenname = "Enchanted Silk Robe" in let gear_type = Armor in
+                            NameAndGearType tokenname gear_type
+                          | False =>
+                            match is_11_18 with
+                            | True =>
+                              let tokenname = "Enchanted Silk Shoes" in let gear_type = Shoes in
+                              NameAndGearType tokenname gear_type
+                            | False =>
+                              match is_12_18 with
+                              | True =>
+                                let tokenname = "Steel Kusarigama" in let gear_type = Weapon in
+                                NameAndGearType tokenname gear_type
+                              | False =>
+                                match is_13_18 with
+                                | True =>
+                                  let tokenname = "Black Soft Beanie" in let gear_type = Helmet in
+                                  NameAndGearType tokenname gear_type
+                                | False =>
+                                  match is_14_18 with
+                                  | True =>
+                                    let tokenname = "Black Soft Hoodie" in let gear_type = Armor in
+                                    NameAndGearType tokenname gear_type
+                                  | False =>
+                                    match is_15_18 with
+                                    | True =>
+                                      let tokenname = "Black Soft Shoes" in let gear_type = Shoes in
+                                      NameAndGearType tokenname gear_type
+                                    | False =>
+                                      match is_16_18 with
+                                      | True =>
+                                        let tokenname = "Silver Ring" in let gear_type = Ring in
+                                        NameAndGearType tokenname gear_type
+                                      | False =>
+                                        let tokenname = "Silver Necklace" in let gear_type = Neclace in
+                                        NameAndGearType tokenname gear_type
+                                      end
+                                    end
+                                  end
+                                end
+                              end
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end;
+      match name_and_type with
+      | NameAndGearType tokenname gear_type =>
+        token_trait = get_token_trait_lv3 gear_type seed tokenname;
+        match token_trait with
+        | HeroesTrait tokenname token_level mainstat substats =>
+            msg = {
+                _tag: "TokenTraitCallback";
+                _recipient: _sender;
+                _amount: Uint128 0;
+                token_id: token_id;
+                tokenname: tokenname;
+                token_level: token_level;
+                mainstat: mainstat;
+                substats: substats
+            };
+            msgs = one_msg msg;
+            send msgs
+        end
+      end
+    | False =>
+      match is_less_than_98 with
+      | True =>
+        name_and_type = match is_0_18 with
+        | True =>
+          let tokenname = "Crimson Sword*" in let gear_type = Weapon in
+          NameAndGearType tokenname gear_type
+        | False =>
+          match is_1_18 with
+          | True =>
+            let tokenname = "Golden Helmet" in let gear_type = Helmet in
+            NameAndGearType tokenname gear_type
+          | False =>
+            match is_2_18 with
+            | True =>
+              let tokenname = "Golden Armor" in let gear_type = Armor in
+              NameAndGearType tokenname gear_type
+            | False =>
+              match is_3_18 with
+              | True =>
+                let tokenname = "Golden Shoes" in let gear_type = Shoes in
+                NameAndGearType tokenname gear_type
+              | False =>
+                match is_4_18 with
+                | True =>
+                  let tokenname = "Crimson Crossbow" in let gear_type = Weapon in
+                  NameAndGearType tokenname gear_type
+                | False =>
+                  match is_5_18 with
+                  | True =>
+                    let tokenname = "Hardened Leather Helmet" in let gear_type = Helmet in
+                    NameAndGearType tokenname gear_type
+                  | False =>
+                    match is_6_18 with
+                    | True =>
+                      let tokenname = "Hardened Leather Armor" in let gear_type = Armor in
+                      NameAndGearType tokenname gear_type
+                    | False =>
+                      match is_7_18 with
+                      | True =>
+                        let tokenname = "Hardened Leather Shoes" in let gear_type = Shoes in
+                        NameAndGearType tokenname gear_type
+                      | False =>
+                        match is_8_18 with
+                        | True =>
+                          let tokenname = "Crimson Staff" in let gear_type = Weapon in
+                          NameAndGearType tokenname gear_type
+                        | False =>
+                          match is_9_18 with
+                          | True =>
+                            let tokenname = "Hardened Silk Cap" in let gear_type = Helmet in
+                            NameAndGearType tokenname gear_type
+                          | False =>
+                            match is_10_18 with
+                            | True =>
+                              let tokenname = "Hardened Silk Robe" in let gear_type = Armor in
+                              NameAndGearType tokenname gear_type
+                            | False =>
+                              match is_11_18 with
+                              | True =>
+                                let tokenname = "Hardened Silk Shoes" in let gear_type = Shoes in
+                                NameAndGearType tokenname gear_type
+                              | False =>
+                                match is_12_18 with
+                                | True =>
+                                  let tokenname = "Dual Kusarigama" in let gear_type = Weapon in
+                                  NameAndGearType tokenname gear_type
+                                | False =>
+                                  match is_13_18 with
+                                  | True =>
+                                    let tokenname = "Enchanted Headband" in let gear_type = Helmet in
+                                    NameAndGearType tokenname gear_type
+                                  | False =>
+                                    match is_14_18 with
+                                    | True =>
+                                      let tokenname = "Enchanted Light Sweater" in let gear_type = Armor in
+                                      NameAndGearType tokenname gear_type
+                                    | False =>
+                                      match is_15_18 with
+                                      | True =>
+                                        let tokenname = "Enchanted Light Sneakers" in let gear_type = Shoes in
+                                        NameAndGearType tokenname gear_type
+                                      | False =>
+                                        match is_16_18 with
+                                        | True =>
+                                          let tokenname = "Gold Ring" in let gear_type = Ring in
+                                          NameAndGearType tokenname gear_type
+                                        | False =>
+                                          let tokenname = "Gold Necklace" in let gear_type = Neclace in
+                                          NameAndGearType tokenname gear_type
+                                        end
+                                      end
+                                    end
+                                  end
+                                end
+                              end
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end;
+        match name_and_type with
+        | NameAndGearType tokenname gear_type =>
+            token_trait = get_token_trait_lv4 gear_type seed tokenname;
+            match token_trait with
+            | HeroesTrait tokenname token_level mainstat substats =>
+                msg = {
+                    _tag: "TokenTraitCallback";
+                    _recipient: _sender;
+                    _amount: Uint128 0;
+                    token_id: token_id;
+                    tokenname: tokenname;
+                    token_level: token_level;
+                    mainstat: mainstat;
+                    substats: substats
+                };
+                msgs = one_msg msg;
+                send msgs
+            end
+        end
+      | False =>
+        name_and_type = match is_0_18 with
+        | True =>
+          let tokenname = "Lowhelms Infinite Sword*" in let gear_type = Weapon in
+          NameAndGearType tokenname gear_type
+        | False =>
+          match is_1_18 with
+          | True =>
+            let tokenname = "Lowhelms King Helmet" in let gear_type = Helmet in
+            NameAndGearType tokenname gear_type
+          | False =>
+            match is_2_18 with
+            | True =>
+              let tokenname = "Lowhelms King Armor" in let gear_type = Armor in
+              NameAndGearType tokenname gear_type
+            | False =>
+              match is_3_18 with
+              | True =>
+                let tokenname = "Lowhelms King Shoes" in let gear_type = Shoes in
+                NameAndGearType tokenname gear_type
+              | False =>
+                match is_4_18 with
+                | True =>
+                  let tokenname = "Lowhelms Mythical Bow" in let gear_type = Weapon in
+                  NameAndGearType tokenname gear_type
+                | False =>
+                  match is_5_18 with
+                  | True =>
+                    let tokenname = "Lowhelms King Hunting Hat" in let gear_type = Helmet in
+                    NameAndGearType tokenname gear_type
+                  | False =>
+                    match is_6_18 with
+                    | True =>
+                      let tokenname = "Lowhelms King Hunting Suit" in let gear_type = Armor in
+                      NameAndGearType tokenname gear_type
+                    | False =>
+                      match is_7_18 with
+                      | True =>
+                        let tokenname = "Lowhelms King Hunting Shoes" in let gear_type = Shoes in
+                        NameAndGearType tokenname gear_type
+                      | False =>
+                        match is_8_18 with
+                        | True =>
+                          let tokenname = "Lowhelms Superior Staff" in let gear_type = Weapon in
+                          NameAndGearType tokenname gear_type
+                        | False =>
+                          match is_9_18 with
+                          | True =>
+                            let tokenname = "Lowhelms King Wizard Hat" in let gear_type = Helmet in
+                            NameAndGearType tokenname gear_type
+                          | False =>
+                            match is_10_18 with
+                            | True =>
+                              let tokenname = "Lowhelms King Robe" in let gear_type = Armor in
+                              NameAndGearType tokenname gear_type
+                            | False =>
+                              match is_11_18 with
+                              | True =>
+                                let tokenname = "Lowhelms King Silk Shoes" in let gear_type = Shoes in
+                                NameAndGearType tokenname gear_type
+                              | False =>
+                                match is_12_18 with
+                                | True =>
+                                  let tokenname = "Lowhelms Dagger of Fatality" in let gear_type = Weapon in
+                                  NameAndGearType tokenname gear_type
+                                | False =>
+                                  match is_13_18 with
+                                  | True =>
+                                    let tokenname = "Lowhelms King Headband" in let gear_type = Helmet in
+                                    NameAndGearType tokenname gear_type
+                                  | False =>
+                                    match is_14_18 with
+                                    | True =>
+                                      let tokenname = "Lowhelms King Ninja Suit" in let gear_type = Armor in
+                                      NameAndGearType tokenname gear_type
+                                    | False =>
+                                      match is_15_18 with
+                                      | True =>
+                                        let tokenname = "Lowhelms King Ninja Shoes" in let gear_type = Shoes in
+                                        NameAndGearType tokenname gear_type
+                                      | False =>
+                                        match is_16_18 with
+                                        | True =>
+                                          let tokenname = "Lowhelms King Ring" in let gear_type = Ring in
+                                          NameAndGearType tokenname gear_type
+                                        | False =>
+                                          let tokenname = "Lowhelms King Necklace" in let gear_type = Neclace in
+                                          NameAndGearType tokenname gear_type
+                                        end
+                                      end
+                                    end
+                                  end
+                                end
+                              end
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end;
+        match name_and_type with
+        | NameAndGearType tokenname gear_type =>
+            token_trait = get_token_trait_lv5 gear_type seed tokenname;
+            match token_trait with
+            | HeroesTrait tokenname token_level mainstat substats =>
+                msg = {
+                    _tag: "TokenTraitCallback";
+                    _recipient: _sender;
+                    _amount: Uint128 0;
+                    token_id: token_id;
+                    tokenname: tokenname;
+                    token_level: token_level;
+                    mainstat: mainstat;
+                    substats: substats
+                };
+                msgs = one_msg msg;
+                send msgs
+            end
+        end
+      end
+    end
+  | False => (* This case is 1* ~ 3* Gear Summons*)
+    match is_less_than_70 with
+    | True =>
+      name_and_type = match is_0_18 with
+      | True =>
+        let tokenname = "Wooden Sword*" in let gear_type = Weapon in
+        NameAndGearType tokenname gear_type
+      | False =>
+        match is_1_18 with
+        | True =>
+          let tokenname = "Copper Helmet" in let gear_type = Helmet in
+          NameAndGearType tokenname gear_type
+        | False =>
+          match is_2_18 with
+          | True =>
+            let tokenname = "Copper Armor" in let gear_type = Armor in
+            NameAndGearType tokenname gear_type
+          | False =>
+            match is_3_18 with
+            | True =>
+              let tokenname = "Copper Shoes" in let gear_type = Shoes in
+              NameAndGearType tokenname gear_type
+            | False =>
+              match is_4_18 with
+              | True =>
+                let tokenname = "Basic Bow" in let gear_type = Weapon in
+                NameAndGearType tokenname gear_type
+              | False =>
+                match is_5_18 with
+                | True =>
+                  let tokenname = "Leather Helmet" in let gear_type = Helmet in
+                  NameAndGearType tokenname gear_type
+                | False =>
+                  match is_6_18 with
+                  | True =>
+                    let tokenname = "Leather Armor" in let gear_type = Armor in
+                    NameAndGearType tokenname gear_type
+                  | False =>
+                    match is_7_18 with
+                    | True =>
+                      let tokenname = "Leather Shoes" in let gear_type = Shoes in
+                      NameAndGearType tokenname gear_type
+                    | False =>
+                      match is_8_18 with
+                      | True =>
+                        let tokenname = "Basic Wand" in let gear_type = Weapon in
+                        NameAndGearType tokenname gear_type
+                      | False =>
+                        match is_9_18 with
+                        | True =>
+                          let tokenname = "Silk Cap" in let gear_type = Helmet in
+                          NameAndGearType tokenname gear_type
+                        | False =>
+                          match is_10_18 with
+                          | True =>
+                            let tokenname = "Silk Robe" in let gear_type = Armor in
+                            NameAndGearType tokenname gear_type
+                          | False =>
+                            match is_11_18 with
+                            | True =>
+                              let tokenname = "Silk Shoes" in let gear_type = Shoes in
+                              NameAndGearType tokenname gear_type
+                            | False =>
+                              match is_12_18 with
+                              | True =>
+                                let tokenname = "Basic Dagger" in let gear_type = Weapon in
+                                NameAndGearType tokenname gear_type
+                              | False =>
+                                match is_13_18 with
+                                | True =>
+                                  let tokenname = "Common Headband" in let gear_type = Helmet in
+                                  NameAndGearType tokenname gear_type
+                                | False =>
+                                  match is_14_18 with
+                                  | True =>
+                                    let tokenname = "White Shirt" in let gear_type = Armor in
+                                    NameAndGearType tokenname gear_type
+                                  | False =>
+                                    match is_15_18 with
+                                    | True =>
+                                      let tokenname = "Soft Shoes" in let gear_type = Shoes in
+                                      NameAndGearType tokenname gear_type
+                                    | False =>
+                                      match is_16_18 with
+                                      | True =>
+                                        let tokenname = "Copper Ring" in let gear_type = Ring in
+                                        NameAndGearType tokenname gear_type
+                                      | False =>
+                                        let tokenname = "Copper Necklace" in let gear_type = Neclace in
+                                        NameAndGearType tokenname gear_type
+                                      end
+                                    end
+                                  end
+                                end
+                              end
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end;
+      match name_and_type with
+      | NameAndGearType tokenname gear_type =>
+        token_trait = get_token_trait_lv1 gear_type seed tokenname;
+        match token_trait with
+        | HeroesTrait tokenname token_level mainstat substats =>
+            msg = {
+                _tag: "TokenTraitCallback";
+                _recipient: _sender;
+                _amount: Uint128 0;
+                token_id: token_id;
+                tokenname: tokenname;
+                token_level: token_level;
+                mainstat: mainstat;
+                substats: substats
+            };
+            msgs = one_msg msg;
+            send msgs
+        end
+      end
+    | False =>
+      match is_less_than_95 with
+      | True => (* This case is 2**)
+        name_and_type = match is_0_18 with
+        | True =>
+          let tokenname = "Stone Sword*" in let gear_type = Weapon in
+          NameAndGearType tokenname gear_type
+        | False =>
+          match is_1_18 with
+          | True =>
+            let tokenname = "Bronze Helmet" in let gear_type = Helmet in
+            NameAndGearType tokenname gear_type
+          | False =>
+            match is_2_18 with
+            | True =>
+              let tokenname = "Bronze Armor" in let gear_type = Armor in
+              NameAndGearType tokenname gear_type
+            | False =>
+              match is_3_18 with
+              | True =>
+                let tokenname = "Bronze Shoes" in let gear_type = Shoes in
+                NameAndGearType tokenname gear_type
+              | False =>
+                match is_4_18 with
+                | True =>
+                  let tokenname = "Apprentice Crossbow" in let gear_type = Weapon in
+                  NameAndGearType tokenname gear_type
+                | False =>
+                  match is_5_18 with
+                  | True =>
+                    let tokenname = "Hardened Leather Helmet" in let gear_type = Helmet in
+                    NameAndGearType tokenname gear_type
+                  | False =>
+                    match is_6_18 with
+                    | True =>
+                      let tokenname = "Hardened Leather Armor" in let gear_type = Armor in
+                      NameAndGearType tokenname gear_type
+                    | False =>
+                      match is_7_18 with
+                      | True =>
+                        let tokenname = "Hardened Leather Boots" in let gear_type = Shoes in
+                        NameAndGearType tokenname gear_type
+                      | False =>
+                        match is_8_18 with
+                        | True =>
+                          let tokenname = "Apprentice Staff" in let gear_type = Weapon in
+                          NameAndGearType tokenname gear_type
+                        | False =>
+                          match is_9_18 with
+                          | True =>
+                            let tokenname = "Hardened Silk Cap" in let gear_type = Helmet in
+                            NameAndGearType tokenname gear_type
+                          | False =>
+                            match is_10_18 with
+                            | True =>
+                              let tokenname = "Hardened Silk Robe" in let gear_type = Armor in
+                              NameAndGearType tokenname gear_type
+                            | False =>
+                              match is_11_18 with
+                              | True =>
+                                let tokenname = "Hardened Silk Shoes" in let gear_type = Shoes in
+                                NameAndGearType tokenname gear_type
+                              | False =>
+                                match is_12_18 with
+                                | True =>
+                                  let tokenname = "Dual Basic Daggers" in let gear_type = Weapon in
+                                  NameAndGearType tokenname gear_type
+                                | False =>
+                                  match is_13_18 with
+                                  | True =>
+                                    let tokenname = "Apprentice Headband" in let gear_type = Helmet in
+                                    NameAndGearType tokenname gear_type
+                                  | False =>
+                                    match is_14_18 with
+                                    | True =>
+                                      let tokenname = "Apprentice Shirt" in let gear_type = Armor in
+                                      NameAndGearType tokenname gear_type
+                                    | False =>
+                                      match is_15_18 with
+                                      | True =>
+                                        let tokenname = "Apprentice Slippers" in let gear_type = Shoes in
+                                        NameAndGearType tokenname gear_type
+                                      | False =>
+                                        match is_16_18 with
+                                        | True =>
+                                          let tokenname = "Bronze Ring" in let gear_type = Shoes in
+                                          NameAndGearType tokenname gear_type
+                                        | False =>
+                                          let tokenname = "Bronze Neclace" in let gear_type = Neclace in
+                                          NameAndGearType tokenname gear_type
+                                        end
+                                      end
+                                    end
+                                  end
+                                end
+                              end
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end;
+        match name_and_type with
+        | NameAndGearType tokenname gear_type =>
+            token_trait = get_token_trait_lv2 gear_type seed tokenname;
+            match token_trait with
+            | HeroesTrait tokenname token_level mainstat substats =>
+                msg = {
+                    _tag: "TokenTraitCallback";
+                    _recipient: _sender;
+                    _amount: Uint128 0;
+                    token_id: token_id;
+                    tokenname: tokenname;
+                    token_level: token_level;
+                    mainstat: mainstat;
+                    substats: substats
+                };
+                msgs = one_msg msg;
+                send msgs
+            end
+        end
+      | False => (* This case is 3**)
+        name_and_type = match is_0_18 with
+        | True =>
+          let tokenname = "Steel Sword*" in let gear_type = Weapon in
+          NameAndGearType tokenname gear_type
+        | False =>
+          match is_1_18 with
+          | True =>
+            let tokenname = "Steel Helmet" in let gear_type = Helmet in
+            NameAndGearType tokenname gear_type
+          | False =>
+            match is_2_18 with
+            | True =>
+              let tokenname = "Steel Armor" in let gear_type = Armor in
+              NameAndGearType tokenname gear_type
+            | False =>
+              match is_3_18 with
+              | True =>
+                let tokenname = "Steel Shoes" in let gear_type = Shoes in
+                NameAndGearType tokenname gear_type
+              | False =>
+                match is_4_18 with
+                | True =>
+                  let tokenname = "Intermediate Archer Bow" in let gear_type = Weapon in
+                  NameAndGearType tokenname gear_type
+                | False =>
+                  match is_5_18 with
+                  | True =>
+                    let tokenname = "Light Huntsman Helmet" in let gear_type = Helmet in
+                    NameAndGearType tokenname gear_type
+                  | False =>
+                    match is_6_18 with
+                    | True =>
+                      let tokenname = "Light Huntsman Armor" in let gear_type = Armor in
+                      NameAndGearType tokenname gear_type
+                    | False =>
+                      match is_7_18 with
+                      | True =>
+                        let tokenname = "Light Huntsman Boots" in let gear_type = Shoes in
+                        NameAndGearType tokenname gear_type
+                      | False =>
+                        match is_8_18 with
+                        | True =>
+                          let tokenname = "Enchanted Wand" in let gear_type = Weapon in
+                          NameAndGearType tokenname gear_type
+                        | False =>
+                          match is_9_18 with
+                          | True =>
+                            let tokenname = "Enchanted Silk Cap" in let gear_type = Helmet in
+                            NameAndGearType tokenname gear_type
+                          | False =>
+                            match is_10_18 with
+                            | True =>
+                              let tokenname = "Enchanted Silk Robe" in let gear_type = Armor in
+                              NameAndGearType tokenname gear_type
+                            | False =>
+                              match is_11_18 with
+                              | True =>
+                                let tokenname = "Enchanted Silk Shoes" in let gear_type = Shoes in
+                                NameAndGearType tokenname gear_type
+                              | False =>
+                                match is_12_18 with
+                                | True =>
+                                  let tokenname = "Steel Kusarigama" in let gear_type = Weapon in
+                                  NameAndGearType tokenname gear_type
+                                | False =>
+                                  match is_13_18 with
+                                  | True =>
+                                    let tokenname = "Black Soft Beanie" in let gear_type = Helmet in
+                                    NameAndGearType tokenname gear_type
+                                  | False =>
+                                    match is_14_18 with
+                                    | True =>
+                                      let tokenname = "Black Soft Hoodie" in let gear_type = Armor in
+                                      NameAndGearType tokenname gear_type
+                                    | False =>
+                                      match is_15_18 with
+                                      | True =>
+                                        let tokenname = "Black Soft Shoes" in let gear_type = Shoes in
+                                        NameAndGearType tokenname gear_type
+                                      | False =>
+                                        match is_16_18 with
+                                        | True =>
+                                          let tokenname = "Silver Ring" in let gear_type = Ring in
+                                          NameAndGearType tokenname gear_type
+                                        | False =>
+                                          let tokenname = "Silver Necklace" in let gear_type = Neclace in
+                                          NameAndGearType tokenname gear_type
+                                        end
+                                      end
+                                    end
+                                  end
+                                end
+                              end
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end;
+        match name_and_type with
+        | NameAndGearType tokenname gear_type =>
+            token_trait = get_token_trait_lv3 gear_type seed tokenname;
+            match token_trait with
+            | HeroesTrait tokenname token_level mainstat substats =>
+                msg = {
+                    _tag: "TokenTraitCallback";
+                    _recipient: _sender;
+                    _amount: Uint128 0;
+                    token_id: token_id;
+                    tokenname: tokenname;
+                    token_level: token_level;
+                    mainstat: mainstat;
+                    substats: substats
+                };
+                msgs = one_msg msg;
+                send msgs
+            end
+        end
+      end
+    end
+  end
+end

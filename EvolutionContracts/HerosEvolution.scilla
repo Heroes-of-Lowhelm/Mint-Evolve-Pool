@@ -1,0 +1,142 @@
+(* SPDX-License-Identifier: MIT *)
+scilla_version 0
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+import BoolUtils ListUtils IntUtils
+library HeroesEvolution
+
+(* Global variables *)
+let zero_address = 0x0000000000000000000000000000000000000000
+let false = False
+let true = True
+
+
+(* Error exception *)
+type Error =
+  | NotAdminError
+  | InvalidCallbackSender
+  | NftNotSetError
+
+let make_error =
+  fun (result: Error) =>
+    let result_code =
+      match result with
+      | NotAdminError                     => Int32 -1
+      | InvalidCallbackSender             => Int32 -2
+      | NftNotSetError                    => Int32 -3
+      end
+    in
+    { _exception: "Error"; code: result_code }
+
+
+(* Library functions *)
+let one_msg =
+  fun (msg: Message) =>
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+let two_msgs =
+  fun (msg1: Message) =>
+  fun (msg2: Message) =>
+    let msgs_tmp = one_msg msg2 in
+    Cons {Message} msg1 msgs_tmp
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+
+contract HeroesEvolution
+(
+  initial_contract_owner: ByStr20
+)
+
+
+(* Mutable fields *)
+(* Set for admins
+  initial_contract_owner is the admin by default *)
+field admins: Map ByStr20 Bool = 
+  let emp_map = Emp ByStr20 Bool in
+  builtin put emp_map initial_contract_owner true
+
+field heroes_nft_address: ByStr20 = zero_address
+
+(* Procedures *)
+(* Emit Errors *)
+procedure Throw(error: Error)
+  e = make_error error;
+  throw e
+end
+
+(* Check is the address is admin or not *)
+procedure IsAdmin(address: ByStr20)
+  has_admin <- exists admins[address];
+  match has_admin with
+  | True =>
+  | False =>
+    error = NotAdminError;
+    Throw error
+  end
+end
+
+(* Transitions *)
+transition EvolveHeroes(id_lv_max: Uint256, id_lv_any: Uint256) 
+  IsAdmin _sender;
+  heroes_nft_address_tmp <- heroes_nft_address;
+  is_zero_addr = builtin eq heroes_nft_address_tmp zero_address;
+  match is_zero_addr with
+  | True =>
+    error = NftNotSetError;
+    Throw error
+  | False =>
+    msg = {
+      _tag: "EvolveHeroes";
+      _recipient: heroes_nft_address_tmp; 
+      _amount: Uint128 0;
+      id_lv_max: id_lv_max; 
+      id_lv_any: id_lv_any
+    };
+    msgs = one_msg msg;
+    send msgs
+  end
+  
+end
+
+transition EvolveHeroesCallback(id_evoluated: Uint256, id_lv_max: Uint256, id_lv_any: Uint256)
+  (* This call back must be invoked by the NFT contract *)
+  heroes_nft_address_tmp <- heroes_nft_address;
+  is_heroes_nft_addr = builtin eq heroes_nft_address_tmp _sender;
+  match is_heroes_nft_addr with
+  | True =>
+    (* Burn old NFTs here *)
+    msg_one = {
+      _tag: "Burn";
+      _recipient: heroes_nft_address_tmp;
+      _amount: Uint128 0;
+      token_id: id_lv_max
+    };
+    msg_two = {
+      _tag: "Burn";
+      _recipient: heroes_nft_address_tmp;
+      _amount: Uint128 0;
+      token_id: id_lv_any
+    };
+    msgs = two_msgs msg_one msg_two;
+    send msgs;
+    e = {
+      _eventname: "NFT Evolved";
+      id_evoluated: id_evoluated;
+      id_lv_max: id_lv_max;
+      id_lv_any: id_lv_any
+    };
+    event e
+  | False =>
+    error = InvalidCallbackSender;
+    Throw error
+  end
+end
+
+transition SetTraitAddr(address: ByStr20)
+  IsAdmin _sender;
+  heroes_nft_address := address
+end

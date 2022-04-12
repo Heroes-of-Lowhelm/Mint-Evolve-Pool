@@ -1,0 +1,404 @@
+(* SPDX-License-Identifier: MIT *)
+scilla_version 0
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+import IntUtils
+
+library RNGOracle
+let one = Uint256 1
+let zero = Uint128 0
+let true = True
+let false = False
+(* Dummy user-defined ADT *)
+(* Error events *)
+type Error =
+| CodeIsOwner
+| CodeIsPendingRequest
+
+let random =
+    fun (entropy: Uint256) =>
+    fun (block_number: BNum) =>
+    fun (addr: ByStr20) =>
+        let addr_hash = builtin keccak256hash addr in
+        let entropy_hash = builtin keccak256hash entropy in
+        let blockhash = builtin keccak256hash block_number in
+        let ehash = builtin concat entropy_hash blockhash in
+        let ahash = builtin concat ehash addr_hash in
+        let last_hash = builtin concat ehash ahash in
+        let hash = builtin keccak256hash last_hash in
+            builtin to_uint256 hash
+
+let make_error =
+    fun (result : Error) =>
+        let result_code =
+        match result with
+        | CodeIsOwner               => Int32 -1
+        | CodeIsPendingRequest      => Int32 -2
+        end
+        in
+        { _exception : "Error"; code : result_code }
+
+let one_msg =
+    fun (msg : Message) =>
+        let nil_msg = Nil {Message} in
+        Cons {Message} msg nil_msg
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+contract RNGOracle
+(
+    contract_owner: ByStr20
+)
+
+(* Mutable fields *)
+field randNonce: Uint256 = Uint256 0
+field modulus: Uint256 = Uint256 1000
+
+(* 1-3 Heroes Summons*)
+field pendingH13Requests: Map Uint256 Bool = Emp Uint256 Bool
+field pendingH13BatchRequests: Map Uint256 Bool = Emp Uint256 Bool
+
+
+(* 3-5 Heroes Summons*)
+field pendingH35Requests: Map Uint256 Bool = Emp Uint256 Bool
+field pendingH35BatchRequests: Map Uint256 Bool = Emp Uint256 Bool
+
+
+(* 1-3 Gears Summons*)
+field pendingG13Requests: Map Uint256 Bool = Emp Uint256 Bool
+field pendingG13BatchRequests: Map Uint256 Bool = Emp Uint256 Bool
+
+
+(* 3-5 Gears Summons*)
+field pendingG35Requests: Map Uint256 Bool = Emp Uint256 Bool
+field pendingG35BatchRequests: Map Uint256 Bool = Emp Uint256 Bool
+
+
+(* Dark/Light Heroes Summons*)
+field pendingHDLRequests: Map Uint256 Bool = Emp Uint256 Bool
+
+(**************************************)
+(*             Procedures             *)
+(**************************************)
+
+procedure ThrowError(error: Error)
+    e = make_error error;
+    throw e
+end
+
+procedure IsNotOwner(address: ByStr20)
+    is_owner = builtin eq contract_owner address;
+    match is_owner with
+    | False =>
+        err = CodeIsOwner;
+        ThrowError err
+    | True =>
+    end
+end
+
+
+(***************************************)
+(*             Transitions             *)
+(***************************************)
+
+(* @dev: Generate random requset id and then returns it to the caller contract by invoking "getRequestId" transition  *)
+transition requestH13RandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingH13Requests[id] := true;
+    e = {_eventname: "RequestedH13RandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getH13RequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+(* @dev: Generate random requset id and then returns it to the caller contract by invoking "getRequestId" transition  *)
+transition requestG13RandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingG13Requests[id] := true;
+    e = {_eventname: "RequestedG13RandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getG13RequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+(* @dev: Generate random requset id and then returns it to the caller contract by invoking "getRequestId" transition  *)
+transition requestH35RandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingH35Requests[id] := true;
+    e = {_eventname: "RequestedH35RandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getH35RequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+(* @dev: Generate random requset id and then returns it to the caller contract by invoking "getRequestId" transition  *)
+transition requestG35RandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingG35Requests[id] := true;
+    e = {_eventname: "RequestedG35RandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getG35RequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+(* @dev: Generate random requset id and then returns it to the caller contract by invoking "getRequestId" transition  *)
+transition requestHDLRandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingHDLRequests[id] := true;
+    e = {_eventname: "RequestedHDLRandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getHDLRequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+
+transition requestH13BatchRandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingH13BatchRequests[id] := true;
+    e = {_eventname: "RequestedH13BatchRandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getH13BatchRequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+transition requestH35BatchRandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingH35BatchRequests[id] := true;
+    e = {_eventname: "RequestedH35BatchRandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getH35BatchRequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+
+transition requestG13BatchRandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingG13BatchRequests[id] := true;
+    e = {_eventname: "RequestedG13BatchRandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getG13BatchRequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+
+transition requestG35BatchRandomNumber()
+    randNonceTemp <- randNonce;
+    cur_nonce = builtin add randNonceTemp one;
+    randNonce := cur_nonce;
+    blk <- & BLOCKNUMBER;
+    id = random cur_nonce blk _sender;
+    pendingG35BatchRequests[id] := true;
+    e = {_eventname: "RequestedG35BatchRandomNumber"; id: id; callerAddress: _sender};
+    event e;
+    msg = {_tag: "getG35BatchRequestId"; _recipient: _sender; _amount: zero; id: id};
+    msgs = one_msg msg;
+    send msgs
+end
+(* @dev: Returns Random Number to _callerAddress by invoking "callback" transition on it. Only contract owner allowed to invoke.   *)
+(* param randomNumber:       Generated Random Number                                                                              *)
+(* param callerAddress:        Original sender address which invokes "request" transition.                                   *)
+(* param id:        Request id.                                                                                                   *)
+transition setH13RandomNumber(random_number: Uint256, caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingH13Requests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingH13Requests[id];
+    msg = {_tag: "callbackH13"; _recipient: caller_address; _amount: zero; random_number: random_number; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetH13RandomNumber"; random_number: random_number; caller_address: caller_address};
+    event e
+end
+
+transition setG13RandomNumber(random_number: Uint256, caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingG13Requests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingG13Requests[id];
+    msg = {_tag: "callbackG13"; _recipient: caller_address; _amount: zero; random_number: random_number; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetG13RandomNumber"; random_number: random_number; caller_address: caller_address};
+    event e
+end
+
+(* @dev: Returns Random Number to _callerAddress by invoking "callback" transition on it. Only contract owner allowed to invoke.   *)
+(* param randomNumber:       Generated Random Number                                                                              *)
+(* param callerAddress:        Original sender address which invokes "request" transition.                                   *)
+(* param id:        Request id.                                                                                                   *)
+transition setH35RandomNumber(random_number: Uint256, caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingH35Requests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingH35Requests[id];
+    msg = {_tag: "callbackH35"; _recipient: caller_address; _amount: zero; random_number: random_number; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetH35RandomNumber"; random_number: random_number; caller_address: caller_address};
+    event e
+end
+
+transition setG35RandomNumber(random_number: Uint256, caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingG35Requests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingG35Requests[id];
+    msg = {_tag: "callbackG35"; _recipient: caller_address; _amount: zero; random_number: random_number; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetG35RandomNumber"; random_number: random_number; caller_address: caller_address};
+    event e
+end
+
+(* @dev: Returns Random Number to _callerAddress by invoking "callback" transition on it. Only contract owner allowed to invoke.   *)
+(* param randomNumber:       Generated Random Number                                                                              *)
+(* param callerAddress:        Original sender address which invokes "request" transition.                                   *)
+(* param id:        Request id.                                                                                                   *)
+transition setHDLRandomNumber(random_number: Uint256, caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingHDLRequests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingHDLRequests[id];
+    msg = {_tag: "callbackHDL"; _recipient: caller_address; _amount: zero; random_number: random_number; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetHDLRandomNumber"; random_number: random_number; caller_address: caller_address};
+    event e
+end
+
+
+
+transition setH13BatchRandomNumber(random_numbers: List (Uint256), caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingH13BatchRequests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingH13BatchRequests[id];
+    msg = {_tag: "callbackBatchH13"; _recipient: caller_address; _amount: zero; random_numbers: random_numbers; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetH13BatchRandomNumber"; random_numbers: random_numbers; caller_address: caller_address};
+    event e
+end
+
+transition setH35BatchRandomNumber(random_numbers: List (Uint256), caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingH35BatchRequests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingH35BatchRequests[id];
+    msg = {_tag: "callbackBatchH35"; _recipient: caller_address; _amount: zero; random_numbers: random_numbers; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetH35BatchRandomNumber"; random_numbers: random_numbers; caller_address: caller_address};
+    event e
+end
+
+transition setG13BatchRandomNumber(random_numbers: List (Uint256), caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingG13BatchRequests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingG13BatchRequests[id];
+    msg = {_tag: "callbackBatchG13"; _recipient: caller_address; _amount: zero; random_numbers: random_numbers; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetG13BatchRandomNumber"; random_numbers: random_numbers; caller_address: caller_address};
+    event e
+end
+
+transition setG35BatchRandomNumber(random_numbers: List (Uint256), caller_address: ByStr20, id: Uint256)
+    IsNotOwner _sender;
+    isPendingRequest <- exists pendingG35BatchRequests[id];
+    match isPendingRequest with
+    | False =>
+        err = CodeIsPendingRequest;
+        ThrowError err
+    | True =>
+    end;
+    delete pendingG35BatchRequests[id];
+    msg = {_tag: "callbackBatchG35"; _recipient: caller_address; _amount: zero; random_numbers: random_numbers; id: id};
+    msgs = one_msg msg;
+    send msgs;
+    e = {_eventname: "SetG35BatchRandomNumber"; random_numbers: random_numbers; caller_address: caller_address};
+    event e
+end
