@@ -1,0 +1,12 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+.idea
+package-lock.json
+#Hardhat files
+cache
+artifacts
+MintingContract/Gears copy.scilla
+RNG_Oracle/client/client.zip

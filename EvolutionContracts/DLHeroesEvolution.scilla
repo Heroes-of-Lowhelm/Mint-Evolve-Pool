@@ -136,7 +136,7 @@ transition EvolveHeroesCallback(id_evoluated: Uint256, id_lv_max: Uint256, id_lv
   end
 end
 
-transition SetTraitAddr(address: ByStr20)
+transition SetNFTAddr(address: ByStr20)
   IsAdmin _sender;
   heroes_nft_address := address
 end
