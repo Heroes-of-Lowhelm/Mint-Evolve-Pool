@@ -489,7 +489,7 @@ procedure BurnToken(token_id: Uint256)
     delete token_uris[token_id];
     delete spenders[token_id];
     delete token_traits[token_id];
-    delete new_token_boost[token_id];
+    delete token_boost_num[token_id];
     (* subtract one from the balance *)
     UpdateBalance sub_operation token_owner;
     (* subtract one from the total supply *)
