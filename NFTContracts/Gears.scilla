@@ -489,7 +489,7 @@ procedure BurnToken(token_id: Uint256)
     delete token_uris[token_id];
     delete spenders[token_id];
     delete token_traits[token_id];
-
+    delete new_token_boost[token_id];
     (* subtract one from the balance *)
     UpdateBalance sub_operation token_owner;
     (* subtract one from the total supply *)
@@ -1147,6 +1147,8 @@ transition EvolveGears(id_lv_max: Uint256, id_lv_any: Uint256)
           token_id = new_token_id_count;
           (* mint a new token *)
           token_owners[token_id] := to;
+          (* Set boost number *)
+          token_boost_num[token_id] := new_token_boost;
           (* add one to the token owner balance *)
           UpdateBalance add_operation to;
           (* add one to the total supply *)

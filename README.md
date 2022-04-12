@@ -1,3 +1,15 @@
+```
+RNG_ORACLE_ADDRESS=0xd17284279b37f48c931f60d6e5327b664e39dd13
+MINTING_POOL_ADDRESS=0xa4aaa10164fa8a26e11a9b720be7ed69287814d5
+GEAR_NFT_ADDRESS=0xd86c93b9aa7c545a01b9441242cd017ca61188d6
+HEROES_NFT_ADDRESS=0x473b3b2530fa7188bab55fccf392045fbf361dde
+DL_HEROES_NFT_ADDRESS=0xc3f5826919baceed72f34ff53c79c59379305b48
+GEAR_TRAIT_ADDRESS=0x5ce6c0783ee4de9db5111e1fb7d56c2e3c761804
+HEROS_EVOLUTION_ADDRESS=0x93b2387303c89fcce1b00a2d214b0e498dde8c30
+DL_HEROES_EVOLUTION_ADDRESS=0x91ddadcc8c4be50a487b9a6e23c9470357391290
+GEAR_EVOLTUION_ADDRESS=0x933810e4a7ea1dbcf957f5bcb85fa2479e38f68a
+```
+
 ## RNG_Oracle
 ### Oracle Client
 - Always listen Oracle Contract's emitted events and filter 2 events : RequestedRandomNumber and RequestedBatchRandomNumber.
@@ -45,14 +57,14 @@
 
 - Deploy Heroes NFT Contract with name, symbol, owner address ...
 
-    ** GasLimit - 40000
+    ** GasLimit - 50000
 
     ** Gas Price - 2000000000
 
 
 - Deploy DL Heroes NFT Contract with name, symbol, owner address ...
 
-    ** GasLimit - 40000
+    ** GasLimit - 50000
 
     ** Gas Price - 2000000000
 
@@ -66,7 +78,7 @@
 
 - Deploy Gears NFT contract with name, symbol, owner address ...
   
-  ** GasLimit - 40000
+  ** GasLimit - 50000
 
   ** Gas Price - 2000000000
 
@@ -74,6 +86,7 @@
 
 
 - Deploy Minting Contract
+  (40000, 200000000)
 
   ** Set HeroesNFT Contract address
 
