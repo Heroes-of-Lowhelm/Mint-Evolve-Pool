@@ -873,7 +873,7 @@ transition callbackBatchH35(random_numbers: List (Uint256), id: Uint256)
         match batchCallerAddress with
         | Some value =>
             (* batchParams = cons_all_batch random_numbers value; *)
-            msg = {_tag: "BatchMint"; _recipient: v; _amount: zero; to: value; seeds: random_numbers; is_high_level: false};
+            msg = {_tag: "BatchMint"; _recipient: v; _amount: zero; to: value; seeds: random_numbers; is_high_level: true};
             msgs = one_msg msg;
             send msgs               
         | None =>
